@@ -350,6 +350,9 @@ describe("MonitorWSServer", () => {
 
       await waitFor(() => server.isConnected("event-server"));
 
+      // Small delay to ensure server is ready to process events
+      await new Promise((r) => setTimeout(r, 50));
+
       // Send event
       client.send(
         JSON.stringify({
