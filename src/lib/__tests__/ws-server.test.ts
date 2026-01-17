@@ -436,6 +436,9 @@ describe("MonitorWSServer", () => {
 
       await waitFor(() => server.isConnected("error-server"));
 
+      // Small delay to ensure message handler is fully ready
+      await new Promise((r) => setTimeout(r, 50));
+
       // Send RPC request that will fail
       await expect(server.request("error-server", "test.fail")).rejects.toThrow(
         "Something went wrong",
