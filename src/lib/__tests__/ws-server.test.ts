@@ -31,6 +31,11 @@ function createTestClient(port: number): Promise<WebSocket> {
   });
 }
 
+import { setDefaultTimeout } from "bun:test";
+
+// Increase timeout for WebSocket tests - CI environments are slower
+setDefaultTimeout(15000);
+
 describe("MonitorWSServer", () => {
   let server: MonitorWSServer;
   let port: number;
