@@ -84,7 +84,7 @@ When you're running multiple OpenCode sessions—whether it's parallel feature d
 
 ```bash
 # Requires Bun: https://bun.sh
-bun add -g opencode-monitor
+bun add -g @actualyze/opencode-monitor
 
 # Install the OpenCode plugin (REQUIRED)
 oc-mon --install-plugin
