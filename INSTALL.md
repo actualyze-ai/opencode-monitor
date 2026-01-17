@@ -28,12 +28,13 @@ Add this to your OpenCode configuration (`~/.config/opencode/config.json`):
 
 ```json
 {
-  "http": {
-    "enabled": true,
-    "port": 0
+  "server": {
+    "hostname": "localhost"
   }
 }
 ```
+
+> **Why `localhost`?** OpenCode only starts the HTTP server when the hostname differs from the default (`127.0.0.1`). See [anomalyco/opencode#8562](https://github.com/anomalyco/opencode/pull/8562) for a cleaner `server.enabled` option (pending merge).
 
 Or via environment variable:
 

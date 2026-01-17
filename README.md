@@ -114,14 +114,13 @@ Add this to your OpenCode configuration (`~/.config/opencode/config.json`):
 
 ```json
 {
-  "http": {
-    "enabled": true,
-    "port": 0
+  "server": {
+    "hostname": "localhost"
   }
 }
 ```
 
-Setting `port: 0` lets OpenCode choose an available port automatically. The plugin will detect the port via `lsof`.
+> **Why `localhost`?** OpenCode only starts the HTTP server when the hostname differs from the default (`127.0.0.1`). Using `localhost` triggers the server while still binding to the loopback interface. See [anomalyco/opencode#8562](https://github.com/anomalyco/opencode/pull/8562) for a cleaner `server.enabled` option (pending merge).
 
 ### Alternative: Environment Variable
 
@@ -137,7 +136,7 @@ opencode
 When OpenCode starts with the HTTP server enabled, you'll see a message like:
 
 ```
-HTTP server listening on http://127.0.0.1:54321
+HTTP server listening on http://localhost:54321
 ```
 
 If you don't see this message, the `t` and `b` keys in the monitor will show a "Server Unavailable" error.
@@ -346,9 +345,8 @@ This means OpenCode is running without its HTTP server enabled.
 ```json
 // ~/.config/opencode/config.json
 {
-  "http": {
-    "enabled": true,
-    "port": 0
+  "server": {
+    "hostname": "localhost"
   }
 }
 ```
