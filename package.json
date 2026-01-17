@@ -1,0 +1,94 @@
+{
+  "name": "opencode-monitor",
+  "version": "1.2.1",
+  "description": "TUI dashboard for monitoring and managing OpenCode sessions",
+  "type": "module",
+  "main": "dist/opencode-monitor.mjs",
+  "bin": {
+    "opencode-monitor": "dist/opencode-monitor.mjs",
+    "oc-mon": "dist/opencode-monitor.mjs"
+  },
+  "scripts": {
+    "dev": "bun run src/index.tsx",
+    "build": "tsup && mv dist/index.js dist/opencode-monitor.mjs",
+    "start": "bun run dist/opencode-monitor.mjs",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
+    "typecheck": "tsc --noEmit",
+    "ci": "bun run typecheck && bun run lint && bun run format:check && bun run test",
+    "clean-logs": "rm -f \"${TMPDIR:-/tmp}/opencode-monitor-debug.log\" \"${TMPDIR:-/tmp}/opencode-plugin.log\" \"${TMPDIR:-/tmp}/monitor.log\" && echo 'Debug logs cleaned'",
+    "prepare": "husky",
+    "install-plugin": "mkdir -p ~/.config/opencode/plugin && cp opencode/plugin/opencode-monitor.js ~/.config/opencode/plugin/",
+    "link-plugin": "mkdir -p ~/.config/opencode/plugin && ln -sf \"$(pwd)/opencode/plugin/opencode-monitor.js\" ~/.config/opencode/plugin/",
+    "uninstall-plugin": "rm -f ~/.config/opencode/plugin/opencode-monitor.js",
+    "prepublishOnly": "bun run ci && bun run build"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix --no-warn-ignored",
+      "prettier --write"
+    ],
+    "*.{js,json}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "opencode",
+    "tui",
+    "session",
+    "monitor",
+    "terminal"
+  ],
+  "files": [
+    "dist/",
+    "opencode/plugin/",
+    "scripts/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualyze-ai/opencode-monitor.git"
+  },
+  "author": "rmk40",
+  "homepage": "https://github.com/actualyze-ai/opencode-monitor#readme",
+  "bugs": {
+    "url": "https://github.com/actualyze-ai/opencode-monitor/issues"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.1.68",
+    "@opentui/react": "^0.1.68",
+    "node-notifier": "^10.0.1",
+    "react": "^19.2.3",
+    "ws": "^8.18.3",
+    "zustand": "^5.0.9"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@testing-library/react": "^16.3.1",
+    "@types/bun": "^1.3.5",
+    "@types/node": "^20.0.0",
+    "@types/node-notifier": "^8.0.5",
+    "@types/react": "^19.2.7",
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.39.2",
+    "fast-check": "^3.15.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "prettier": "^3.7.4",
+    "tsup": "^8.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.51.0"
+  }
+}
