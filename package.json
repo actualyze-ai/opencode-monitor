@@ -1,6 +1,6 @@
 {
   "name": "@actualyze/opencode-monitor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TUI dashboard for monitoring and managing OpenCode sessions",
   "type": "module",
   "main": "dist/opencode-monitor.mjs",

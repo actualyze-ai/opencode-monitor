@@ -16,6 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.1] - 2026-01-16
+
+### Changed
+
+- Switch to npm Trusted Publishing (OIDC) for automated releases
+- Add provenance attestation for supply chain security
+- Publish package as `@actualyze/opencode-monitor` on npm
+
+### Fixed
+
+- Update OpenCode server config docs to use working `server.hostname: "localhost"` workaround
+
+---
+
 ## [1.0.0] - 2026-01-16
 
 First stable release of OpenCode Monitor with WebSocket reverse proxy architecture and OpenTUI framework.
