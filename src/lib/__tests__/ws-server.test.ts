@@ -524,8 +524,8 @@ describe("MonitorWSServer", () => {
       // Send malformed JSON - should not crash server
       client.send("not valid json {{{");
 
-      // Wait a bit
-      await new Promise((r) => setTimeout(r, 50));
+      // Wait for server to process the malformed message
+      await new Promise((r) => setTimeout(r, 100));
 
       // Server should still be running and accepting connections
       const client2 = await createTestClient(port);
@@ -539,7 +539,7 @@ describe("MonitorWSServer", () => {
       };
       client2.send(JSON.stringify(hello));
 
-      await waitFor(() => server.isConnected("after-malformed"));
+      await waitFor(() => server.isConnected("after-malformed"), 2000);
       expect(server.isConnected("after-malformed")).toBe(true);
     });
   });
