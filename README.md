@@ -83,8 +83,9 @@ When you're running multiple OpenCode sessions—whether it's parallel feature d
 ### Install from npm (Recommended)
 
 ```bash
-# Requires Bun: https://bun.sh
-bun add -g @actualyze/opencode-monitor
+# Install globally (choose one)
+npm install -g @actualyze/opencode-monitor
+# or: bun add -g @actualyze/opencode-monitor
 
 # Install the OpenCode plugin (REQUIRED)
 oc-mon --install-plugin
@@ -92,6 +93,8 @@ oc-mon --install-plugin
 # Start monitoring
 oc-mon
 ```
+
+> **Note**: To attach to sessions or open them in browser, OpenCode must be running with its HTTP server enabled. See [OpenCode Server Mode](#opencode-server-mode) below.
 
 ### Install from source
 
