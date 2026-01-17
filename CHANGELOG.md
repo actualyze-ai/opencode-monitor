@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the OpenCode Session Monitor will be documented in this file.
+All notable changes to OpenCode Monitor will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -16,76 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.1] - 2026-01-14
+## [1.0.0] - 2026-01-16
 
-### Changed
-
-- **Consolidated CI/release workflow**: Release job now depends on CI passing (`needs: [ci]`)
-- **Single workflow file**: Merged `release.yml` into `ci.yml` for simpler maintenance
-
-### Fixed
-
-- **Release race condition**: Releases now wait for CI to pass before creating artifacts
-
----
-
-## [1.2.0] - 2026-01-14
-
-### Added
-
-- **Collapsible server groups**: Press Space to collapse/expand server sections
-- **Server details panel**: View server info when server header is selected
-- **Scroll indicators**: Shows count of items above/below visible area
-- **Selectable server headers**: Navigate to server rows (no longer skipped)
-- **Terminal tab title**: Shows "oc-mon" in terminal tab instead of "bun"
-- **Centralized APP_NAME**: Single source of truth for application name
-
-### Changed
-
-- **Parallel server polling**: Status and details refresh now fetch from all servers concurrently
-- **Memoized SessionDetails**: Expensive calculations (age, context, cost, childCount) now use useMemo
-- **Event handler map**: WebSocket event dispatch uses handler map instead of if-else chain
-- **ModalContainer component**: Extracted common modal styling for consistency
-- **checkServerAndExecute helper**: Consolidated server availability check patterns
-
-### Fixed
-
-- **Unhandled promise rejection**: Added catch handler for session details fetch
-- **Silent cache errors**: Cache save/load now logs errors in debug mode
-
-### Improved
-
-- **State architecture**: Moved pendingLaunchRequest from global variable to Zustand store
-- **Function stability**: Added useCallback for exit function
-- **Debug logging**: Cache operations now log errors when debug mode is enabled
-
----
-
-## [1.1.1] - 2026-01-13
-
-### Fixed
-
-- Footer now renders with bottom border correctly
-
----
-
-## [1.1.0] - 2026-01-13
-
-### Added
-
-- Collapsible server groups (Space key to toggle)
-- Server details panel when server header is selected
-- Scroll indicators showing items above/below visible area
-
-### Changed
-
-- Server headers are now selectable during navigation
-
----
-
-## [1.0.0] - 2025-01-04
-
-First stable release with WebSocket reverse proxy architecture and OpenTUI framework.
+First stable release of OpenCode Monitor with WebSocket reverse proxy architecture and OpenTUI framework.
 
 ### Core Features
 
@@ -93,6 +26,9 @@ First stable release with WebSocket reverse proxy architecture and OpenTUI frame
 - **OpenCode Plugin**: WebSocket client plugin for reverse proxy architecture
 - **Automatic Instance Discovery**: Plugin connects to TUI via WebSocket, enabling remote monitoring
 - **Session Details Panel**: Rich session information including tokens, cost, context, model, and hierarchy
+- **Collapsible Server Groups**: Press Space to collapse/expand server sections
+- **Server Details Panel**: View server info when server header is selected
+- **Desktop Notifications**: Get notified when sessions complete or need permission approval
 
 ### Architecture
 
@@ -105,7 +41,7 @@ First stable release with WebSocket reverse proxy architecture and OpenTUI frame
   - Controller process manages TUI lifecycle
   - Inner process runs the actual TUI
   - Respawns on exit code 42 for seamless relaunch after `opencode attach`
-- **OpenTUI Framework**: Migrated from Ink to OpenTUI for better performance
+- **OpenTUI Framework**: Built on OpenTUI for excellent performance
   - Stable memory usage (~52-100MB with healthy GC)
   - Runtime: Bun
   - Testing: Bun's built-in test runner with fast-check
@@ -135,7 +71,8 @@ First stable release with WebSocket reverse proxy architecture and OpenTUI frame
 - Visual status indicators with spinner animation for busy sessions
 - Grouped sessions by server with visual headers
 - Subagent label formatting (`@agent-type` suffix)
-- Version string in footer (`oc-mon v1.0.0` or `oc-mon v1.0.0-abc123` for dev builds)
+- Scroll indicators showing items above/below visible area
+- Terminal tab title shows "oc-mon"
 
 ### Session Actions
 
@@ -161,12 +98,11 @@ First stable release with WebSocket reverse proxy architecture and OpenTUI frame
 - `--ws-port` CLI option for configurable WebSocket port
 - `--no-notify` CLI option to disable desktop notifications
 - `--debug` CLI option for debug logging
-- `--memory-debug` CLI option for memory leak investigation
 
 ### Technical Implementation
 
 - Composite session IDs (`serverId:sessionId`) for multi-server uniqueness
-- Refs for polling to avoid React dependency array issues
+- Zustand for state management
 - Incremental rendering to prevent terminal flicker
 - Alternate screen mode for clean terminal restoration
 - Console output redirected to log file to prevent TUI corruption
@@ -180,5 +116,3 @@ First stable release with WebSocket reverse proxy architecture and OpenTUI frame
 - `node-notifier` ^10.0.1 - Desktop notifications
 - `ws` ^8.18.3 - WebSocket client/server
 - `zustand` ^5.0.9 - State management
-- `typescript` ^5.0 - Type safety
-- `tsup` ^8.0 - Bundler

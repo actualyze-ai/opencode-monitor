@@ -2,7 +2,7 @@
 
 **Keep track of all your OpenCode sessions in one place.** Monitor dozens of AI coding sessions across multiple machines, get instant desktop notifications when tasks complete or need approval, and jump into any session with a single keystroke.
 
-![Version](https://img.shields.io/badge/version-1.2.1-blue)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Bun](https://img.shields.io/badge/bun-%3E%3D1.0-f472b6)
 
