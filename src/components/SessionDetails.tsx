@@ -10,6 +10,8 @@ import { TextAttributes } from "@opentui/core";
 import { getStatusColor, getContextUsageColor } from "../lib/format";
 import { truncateText } from "../lib/text";
 import { Row, Col } from "./primitives";
+import { DEFAULT_THEME } from "../themes";
+import type { Theme } from "../themes";
 import type { Server, Session, SessionNode } from "../types";
 
 interface SessionDetailsProps {
@@ -21,6 +23,8 @@ interface SessionDetailsProps {
   panelWidth: number;
   /** Session nodes for calculating child count */
   nodesByServer: Map<string, SessionNode[]>;
+  /** Resolved UI theme */
+  theme?: Theme;
 }
 
 /**
@@ -29,15 +33,17 @@ interface SessionDetailsProps {
 function SectionDivider({
   title,
   panelWidth,
+  theme,
 }: {
   title: string;
   panelWidth: number;
+  theme: Theme;
 }): React.ReactNode {
   const dividerLine = "─".repeat(Math.max(0, panelWidth - title.length - 7));
   return (
     <Row marginTop={1}>
-      <text fg="#666666">{`── ${title} `}</text>
-      <text fg="#444444">{dividerLine}</text>
+      <text fg={theme.textMuted}>{`── ${title} `}</text>
+      <text fg={theme.border}>{dividerLine}</text>
     </Row>
   );
 }
@@ -102,6 +108,7 @@ export function SessionDetails({
   server,
   panelWidth,
   nodesByServer,
+  theme = DEFAULT_THEME,
 }: SessionDetailsProps): React.ReactNode {
   // Memoize age calculation (changes with createdAt)
   const ageStr = useMemo(() => {
@@ -148,7 +155,7 @@ export function SessionDetails({
   // Pre-compute all string values
   const sessionId = (session.originalId || "").slice(-8);
   const statusValue = session.status || "idle";
-  const statusColor = getStatusColor(statusValue);
+  const statusColor = getStatusColor(statusValue, theme);
   const messageCountStr =
     session.messageCount !== undefined && session.messageCount > 0
       ? String(session.messageCount)
@@ -156,6 +163,7 @@ export function SessionDetails({
   const contextColor = getContextUsageColor(
     session.contextUsed,
     session.contextLimit,
+    theme,
   );
   const modelStr = session.model
     ? `${session.model.provider || "unknown"} / ${session.model.model || "unknown"}`
@@ -223,7 +231,7 @@ export function SessionDetails({
       {/* Usage Section */}
       {showUsage ? (
         <Col>
-          <SectionDivider title="Usage" panelWidth={panelWidth} />
+          <SectionDivider title="Usage" panelWidth={panelWidth} theme={theme} />
           {contextStr !== "" ? (
             <LabeledValue
               label="Context: "
@@ -240,7 +248,11 @@ export function SessionDetails({
       {/* Tokens Section */}
       {showTokens ? (
         <Col>
-          <SectionDivider title="Tokens" panelWidth={panelWidth} />
+          <SectionDivider
+            title="Tokens"
+            panelWidth={panelWidth}
+            theme={theme}
+          />
           <Row justifyContent="space-between">
             <LabeledValue label="Input: " value={inputStr} />
             <LabeledValue label="Cache R: " value={cacheReadStr} />
@@ -258,13 +270,15 @@ export function SessionDetails({
       {/* Model Section */}
       {showModel ? (
         <Col>
-          <SectionDivider title="Model" panelWidth={panelWidth} />
-          <text style={{ attributes: dim }}>{modelStr}</text>
+          <SectionDivider title="Model" panelWidth={panelWidth} theme={theme} />
+          <text style={{ attributes: dim }} fg={theme.textMuted}>
+            {modelStr}
+          </text>
         </Col>
       ) : null}
 
       {/* Location Section */}
-      <SectionDivider title="Location" panelWidth={panelWidth} />
+      <SectionDivider title="Location" panelWidth={panelWidth} theme={theme} />
       {statusUpdatedStr !== "" ? (
         <Row marginBottom={1}>
           <LabeledValue label="Status updated: " value={statusUpdatedStr} />
@@ -275,9 +289,13 @@ export function SessionDetails({
       ) : null}
       {directoryStr !== "" ? (
         <Col marginTop={1}>
-          <text style={{ attributes: dimBold }}>{"Directory:"}</text>
+          <text style={{ attributes: dimBold }} fg={theme.textMuted}>
+            {"Directory:"}
+          </text>
           <Row paddingLeft={1}>
-            <text style={{ attributes: dim }}>{directoryStr}</text>
+            <text style={{ attributes: dim }} fg={theme.textMuted}>
+              {directoryStr}
+            </text>
           </Row>
         </Col>
       ) : null}
@@ -285,15 +303,21 @@ export function SessionDetails({
         <Col marginTop={1}>
           {serverUrlStr === "disabled" ? (
             <text>
-              <span style={{ attributes: dimBold }}>{"Server: "}</span>
-              <span style={{ attributes: dim }}>{serverNameStr}</span>
-              <span fg="yellow">{" (HTTP Disabled)"}</span>
+              <span style={{ attributes: dimBold }} fg={theme.textMuted}>
+                {"Server: "}
+              </span>
+              <span style={{ attributes: dim }} fg={theme.textMuted}>
+                {serverNameStr}
+              </span>
+              <span fg={theme.warning}>{" (HTTP Disabled)"}</span>
             </text>
           ) : (
             <>
               <LabeledValue label="Server: " value={serverNameStr} />
               <Row paddingLeft={1}>
-                <text style={{ attributes: dim }}>{serverUrlStr}</text>
+                <text style={{ attributes: dim }} fg={theme.textMuted}>
+                  {serverUrlStr}
+                </text>
               </Row>
             </>
           )}
@@ -303,7 +327,11 @@ export function SessionDetails({
       {/* Hierarchy Section */}
       {showHierarchy ? (
         <Col>
-          <SectionDivider title="Hierarchy" panelWidth={panelWidth} />
+          <SectionDivider
+            title="Hierarchy"
+            panelWidth={panelWidth}
+            theme={theme}
+          />
           {parentIdStr !== "" ? (
             <LabeledValue label="Parent: " value={parentIdStr} />
           ) : null}

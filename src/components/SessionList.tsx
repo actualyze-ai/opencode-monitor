@@ -10,6 +10,8 @@ import {
 import { truncateText } from "../lib/text";
 import Spinner from "./Spinner";
 import { Row, Col } from "./primitives";
+import { getSelectedTextColor, getThemedBoxProps } from "../themes";
+import type { Theme } from "../themes";
 import type { Session, SessionNode, Server, ListItem } from "../types";
 
 interface SessionListProps {
@@ -21,12 +23,14 @@ interface SessionListProps {
   servers: Map<string, Server>;
   nodesByServer: Map<string, SessionNode[]>;
   collapsedServers: Set<string>;
+  theme: Theme;
 }
 
 function renderSessionName(
   name: string,
   maxWidth: number,
   isSelected: boolean,
+  theme: Theme,
 ): React.ReactNode {
   const safeName = name || "";
   const subagentMatch = safeName.match(
@@ -46,11 +50,11 @@ function renderSessionName(
           style={{
             attributes: isSelected ? TextAttributes.BOLD : TextAttributes.NONE,
           }}
-          fg={isSelected ? "white" : "#cccccc"}
+          fg={isSelected ? getSelectedTextColor(theme) : theme.text}
         >
           {truncatedMain}
         </text>
-        <text fg={isSelected ? "#888888" : "#555555"}>{suffix}</text>
+        <text fg={isSelected ? theme.text : theme.textMuted}>{suffix}</text>
       </>
     );
   }
@@ -60,7 +64,7 @@ function renderSessionName(
       style={{
         attributes: isSelected ? TextAttributes.BOLD : TextAttributes.NONE,
       }}
-      fg={isSelected ? "white" : "#cccccc"}
+      fg={isSelected ? getSelectedTextColor(theme) : theme.text}
     >
       {truncateText(safeName, maxWidth)}
     </text>
@@ -71,43 +75,63 @@ function SessionStatus({
   session,
   isPending,
   isSelected,
+  theme,
 }: {
   session: Session;
   isPending: boolean;
   isSelected: boolean;
+  theme: Theme;
 }): React.ReactNode {
-  const dimColor = "#444444";
+  const dimColor = theme.textMuted;
 
   if (isPending) {
     return <text fg={dimColor}>○</text>;
   }
 
   if (session.status === "busy" || session.status === "retry") {
-    return <Spinner isBusy={true} />;
+    return <Spinner isBusy={true} theme={theme} />;
   }
 
   if (session.status === "waiting_for_permission") {
     return (
-      <text style={{ attributes: TextAttributes.BOLD }} fg="yellow">
+      <text style={{ attributes: TextAttributes.BOLD }} fg={theme.warning}>
         ◉
       </text>
     );
   }
 
   if (session.status === "idle") {
-    return <text fg={isSelected ? "white" : "green"}>●</text>;
+    return (
+      <text fg={isSelected ? getSelectedTextColor(theme) : theme.success}>
+        ●
+      </text>
+    );
   }
 
   if (session.status === "completed") {
-    return <text fg={isSelected ? "white" : "#666666"}>○</text>;
+    return (
+      <text fg={isSelected ? getSelectedTextColor(theme) : theme.textMuted}>
+        ○
+      </text>
+    );
   }
 
   if (session.status === "error" || session.status === "aborted") {
-    return <text fg={isSelected ? "white" : "red"}>✕</text>;
+    return (
+      <text fg={isSelected ? getSelectedTextColor(theme) : theme.error}>✕</text>
+    );
   }
 
   return (
-    <text fg={isSelected ? "white" : getStatusColor(session.status)}>●</text>
+    <text
+      fg={
+        isSelected
+          ? getSelectedTextColor(theme)
+          : getStatusColor(session.status, theme)
+      }
+    >
+      ●
+    </text>
   );
 }
 
@@ -117,12 +141,14 @@ function ServerGroupRow({
   nodeCount,
   isSelected,
   isCollapsed,
+  theme,
 }: {
   serverId: string;
   server: Server | undefined;
   nodeCount: number;
   isSelected: boolean;
   isCollapsed: boolean;
+  theme: Theme;
 }): React.ReactNode {
   const serverName = server?.name || serverId;
   const isPending = server?.pending === true;
@@ -131,13 +157,19 @@ function ServerGroupRow({
   return (
     <Row
       key={`group-${serverId}`}
-      backgroundColor={isSelected ? "#264f78" : "#1a1a1a"}
+      backgroundColor={isSelected ? theme.surface : theme.bg}
       paddingLeft={1}
       paddingRight={1}
     >
       <text
         style={{ attributes: TextAttributes.BOLD }}
-        fg={isSelected ? "white" : isPending ? "#666666" : "yellow"}
+        fg={
+          isSelected
+            ? getSelectedTextColor(theme)
+            : isPending
+              ? theme.textMuted
+              : theme.primary
+        }
       >
         {`${indicator} ${serverName} (${nodeCount})`}
       </text>
@@ -150,16 +182,18 @@ function SessionRow({
   server,
   isSelected,
   listWidth,
+  theme,
 }: {
   node: SessionNode;
   server: Server | undefined;
   isSelected: boolean;
   listWidth: number;
+  theme: Theme;
 }): React.ReactNode {
   const session = node.session;
   const isPending = server?.pending === true;
   const treePrefixWidth = node.treePrefix.length;
-  const dimColor = "#444444";
+  const dimColor = theme.textMuted;
 
   const statusW = 3;
   const timeW = 13;
@@ -173,12 +207,12 @@ function SessionRow({
   return (
     <Row
       key={`session-${session.id}`}
-      {...(isSelected ? { backgroundColor: "#264f78" } : {})}
+      {...(isSelected ? { backgroundColor: theme.surface } : {})}
       paddingLeft={1}
       paddingRight={1}
     >
       {node.treePrefix ? (
-        <text fg={isSelected ? "#888888" : dimColor}>{node.treePrefix}</text>
+        <text fg={isSelected ? theme.text : dimColor}>{node.treePrefix}</text>
       ) : null}
 
       <Row width={statusW}>
@@ -186,6 +220,7 @@ function SessionRow({
           session={session}
           isPending={isPending}
           isSelected={isSelected}
+          theme={theme}
         />
       </Row>
 
@@ -193,7 +228,7 @@ function SessionRow({
         {isPending ? (
           <text fg={dimColor}>{truncateText(session.name || "", nameW)}</text>
         ) : (
-          renderSessionName(session.name || "", nameW, isSelected)
+          renderSessionName(session.name || "", nameW, isSelected, theme)
         )}
       </Row>
 
@@ -203,10 +238,11 @@ function SessionRow({
             isPending
               ? dimColor
               : isSelected
-                ? "#aaaaaa"
+                ? theme.text
                 : getContextUsageColor(
                     session.contextUsed,
                     session.contextLimit,
+                    theme,
                   )
           }
         >
@@ -215,7 +251,9 @@ function SessionRow({
       </Row>
 
       <Row width={tokensW} justifyContent="flex-end" paddingRight={1}>
-        <text fg={isPending ? dimColor : isSelected ? "#aaaaaa" : "#666666"}>
+        <text
+          fg={isPending ? dimColor : isSelected ? theme.text : theme.textMuted}
+        >
           {session.tokens !== undefined && session.tokens >= 1000
             ? `${Math.round(session.tokens / 1000)}k`
             : session.tokens !== undefined
@@ -225,7 +263,9 @@ function SessionRow({
       </Row>
 
       <Row width={timeW} justifyContent="flex-end">
-        <text fg={isPending ? dimColor : isSelected ? "#aaaaaa" : "#666666"}>
+        <text
+          fg={isPending ? dimColor : isSelected ? theme.text : theme.textMuted}
+        >
           {formatTimestamp(session.lastActivity)}
         </text>
       </Row>
@@ -242,6 +282,7 @@ export function SessionList({
   servers,
   nodesByServer,
   collapsedServers,
+  theme,
 }: SessionListProps): React.ReactNode {
   const hasMoreAbove = scrollOffset > 0;
   const hasMoreBelow = scrollOffset + visibleItems.length < totalItems;
@@ -250,9 +291,15 @@ export function SessionList({
 
   if (servers.size === 0) {
     return (
-      <Col width={listWidth} flexGrow={1}>
-        <Col paddingLeft={1} paddingRight={1} paddingTop={1} paddingBottom={1}>
-          <text style={{ attributes: TextAttributes.DIM }}>
+      <Col width={listWidth} flexGrow={1} {...getThemedBoxProps(theme)}>
+        <Col
+          paddingLeft={1}
+          paddingRight={1}
+          paddingTop={1}
+          paddingBottom={1}
+          {...getThemedBoxProps(theme)}
+        >
+          <text style={{ attributes: TextAttributes.DIM }} fg={theme.textMuted}>
             {"Waiting for OpenCode servers..."}
           </text>
         </Col>
@@ -261,11 +308,11 @@ export function SessionList({
   }
 
   return (
-    <Col width={listWidth} flexGrow={1}>
+    <Col width={listWidth} flexGrow={1} {...getThemedBoxProps(theme)}>
       {/* Scroll indicator - more above */}
       {hasMoreAbove ? (
-        <Row justifyContent="center">
-          <text fg="cyan">{`▲ ${moreAboveCount} more above`}</text>
+        <Row justifyContent="center" {...getThemedBoxProps(theme)}>
+          <text fg={theme.primary}>{`▲ ${moreAboveCount} more above`}</text>
         </Row>
       ) : null}
 
@@ -285,6 +332,7 @@ export function SessionList({
               nodeCount={groupNodes.length}
               isSelected={isSelected}
               isCollapsed={isCollapsed}
+              theme={theme}
             />
           );
         }
@@ -297,17 +345,18 @@ export function SessionList({
             server={server}
             isSelected={isSelected}
             listWidth={listWidth}
+            theme={theme}
           />
         );
       })}
 
       {/* Spacer to push "more below" to bottom */}
-      <Col flexGrow={1} />
+      <Col flexGrow={1} {...getThemedBoxProps(theme)} />
 
       {/* Scroll indicator - more below */}
       {hasMoreBelow ? (
-        <Row justifyContent="center">
-          <text fg="cyan">{`▼ ${moreBelowCount} more below`}</text>
+        <Row justifyContent="center" {...getThemedBoxProps(theme)}>
+          <text fg={theme.primary}>{`▼ ${moreBelowCount} more below`}</text>
         </Row>
       ) : null}
     </Col>

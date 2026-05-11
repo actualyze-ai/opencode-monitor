@@ -5,6 +5,8 @@
 import React from "react";
 import { TextAttributes } from "@opentui/core";
 import { Row, Col } from "./primitives";
+import { DEFAULT_THEME } from "../themes";
+import type { Theme } from "../themes";
 import type { Server, Session } from "../types";
 
 interface ServerDetailsProps {
@@ -14,6 +16,8 @@ interface ServerDetailsProps {
   serverSessions: Session[];
   /** Width of the details panel */
   panelWidth: number;
+  /** Resolved UI theme */
+  theme?: Theme;
 }
 
 /**
@@ -22,15 +26,17 @@ interface ServerDetailsProps {
 function SectionDivider({
   title,
   panelWidth,
+  theme,
 }: {
   title: string;
   panelWidth: number;
+  theme: Theme;
 }): React.ReactNode {
   const dividerLine = "─".repeat(Math.max(0, panelWidth - title.length - 7));
   return (
     <Row marginTop={1}>
-      <text fg="#666666">{`── ${title} `}</text>
-      <text fg="#444444">{dividerLine}</text>
+      <text fg={theme.textMuted}>{`── ${title} `}</text>
+      <text fg={theme.border}>{dividerLine}</text>
     </Row>
   );
 }
@@ -44,12 +50,14 @@ function LabeledValue({
   valueColor,
   labelStyle,
   valueStyle,
+  theme = DEFAULT_THEME,
 }: {
   label: string;
   value: string;
   valueColor?: string;
   labelStyle?: number;
   valueStyle?: number;
+  theme?: Theme;
 }): React.ReactNode {
   const labelAttrs = labelStyle ?? TextAttributes.BOLD | TextAttributes.DIM;
   const valueAttrs = valueStyle ?? TextAttributes.DIM;
@@ -57,7 +65,9 @@ function LabeledValue({
   if (valueColor) {
     return (
       <text>
-        <span style={{ attributes: labelAttrs }}>{label}</span>
+        <span style={{ attributes: labelAttrs }} fg={theme.textMuted}>
+          {label}
+        </span>
         <span style={{ attributes: valueAttrs }} fg={valueColor}>
           {value}
         </span>
@@ -67,8 +77,12 @@ function LabeledValue({
 
   return (
     <text>
-      <span style={{ attributes: labelAttrs }}>{label}</span>
-      <span style={{ attributes: valueAttrs }}>{value}</span>
+      <span style={{ attributes: labelAttrs }} fg={theme.textMuted}>
+        {label}
+      </span>
+      <span style={{ attributes: valueAttrs }} fg={theme.textMuted}>
+        {value}
+      </span>
     </text>
   );
 }
@@ -80,6 +94,7 @@ export function ServerDetails({
   server,
   serverSessions,
   panelWidth,
+  theme = DEFAULT_THEME,
 }: ServerDetailsProps): React.ReactNode {
   const dim = TextAttributes.DIM;
   const dimBold = TextAttributes.BOLD | TextAttributes.DIM;
@@ -87,7 +102,7 @@ export function ServerDetails({
   // Connection status
   const isConnected = !server.pending;
   const statusStr = isConnected ? "Connected" : "Pending";
-  const statusColor = isConnected ? "green" : "yellow";
+  const statusColor = isConnected ? theme.success : theme.warning;
 
   // Last seen formatting
   const lastSeenStr = new Date(server.lastSeen).toLocaleTimeString();
@@ -132,25 +147,31 @@ export function ServerDetails({
     <Col marginTop={1}>
       {/* Basic Info */}
       <Row justifyContent="space-between">
-        <LabeledValue label="ID: " value={serverIdStr} />
+        <LabeledValue label="ID: " value={serverIdStr} theme={theme} />
         <LabeledValue
           label="Status: "
           value={statusStr}
           valueColor={statusColor}
           valueStyle={0}
+          theme={theme}
         />
       </Row>
-      <LabeledValue label="Last seen: " value={lastSeenStr} />
+      <LabeledValue label="Last seen: " value={lastSeenStr} theme={theme} />
 
       {/* Sessions Section */}
-      <SectionDivider title="Sessions" panelWidth={panelWidth} />
+      <SectionDivider title="Sessions" panelWidth={panelWidth} theme={theme} />
       <Row justifyContent="space-between">
-        <LabeledValue label="Total: " value={String(totalSessions)} />
+        <LabeledValue
+          label="Total: "
+          value={String(totalSessions)}
+          theme={theme}
+        />
         {activeSessions > 0 ? (
           <LabeledValue
             label="Active: "
             value={String(activeSessions)}
-            valueColor="cyan"
+            valueColor={theme.primary}
+            theme={theme}
           />
         ) : null}
       </Row>
@@ -159,14 +180,16 @@ export function ServerDetails({
           <LabeledValue
             label="Idle: "
             value={String(idleSessions)}
-            valueColor="green"
+            valueColor={theme.success}
+            theme={theme}
           />
         ) : null}
         {waitingSessions > 0 ? (
           <LabeledValue
             label="Waiting: "
             value={String(waitingSessions)}
-            valueColor="yellow"
+            valueColor={theme.warning}
+            theme={theme}
           />
         ) : null}
       </Row>
@@ -176,39 +199,47 @@ export function ServerDetails({
             <LabeledValue
               label="Completed: "
               value={String(completedSessions)}
+              theme={theme}
             />
           ) : null}
           {errorSessions > 0 ? (
             <LabeledValue
               label="Errors: "
               value={String(errorSessions)}
-              valueColor="red"
+              valueColor={theme.error}
+              theme={theme}
             />
           ) : null}
         </Row>
       ) : null}
 
       {/* Location Section */}
-      <SectionDivider title="Location" panelWidth={panelWidth} />
+      <SectionDivider title="Location" panelWidth={panelWidth} theme={theme} />
       {server.project ? (
-        <LabeledValue label="Project: " value={server.project} />
+        <LabeledValue label="Project: " value={server.project} theme={theme} />
       ) : null}
       {server.branch ? (
-        <LabeledValue label="Branch: " value={server.branch} />
+        <LabeledValue label="Branch: " value={server.branch} theme={theme} />
       ) : null}
       {server.url ? (
         server.url === "disabled" ? (
           <Col marginTop={1}>
-            <text style={{ attributes: dimBold }}>{"HTTP Server:"}</text>
+            <text style={{ attributes: dimBold }} fg={theme.textMuted}>
+              {"HTTP Server:"}
+            </text>
             <Row paddingLeft={1}>
-              <text fg="yellow">Disabled</text>
+              <text fg={theme.warning}>Disabled</text>
             </Row>
           </Col>
         ) : (
           <Col marginTop={1}>
-            <text style={{ attributes: dimBold }}>{"URL:"}</text>
+            <text style={{ attributes: dimBold }} fg={theme.textMuted}>
+              {"URL:"}
+            </text>
             <Row paddingLeft={1}>
-              <text style={{ attributes: dim }}>{server.url}</text>
+              <text style={{ attributes: dim }} fg={theme.textMuted}>
+                {server.url}
+              </text>
             </Row>
           </Col>
         )
@@ -217,12 +248,20 @@ export function ServerDetails({
       {/* Usage Section */}
       {showUsage ? (
         <Col>
-          <SectionDivider title="Usage" panelWidth={panelWidth} />
+          <SectionDivider title="Usage" panelWidth={panelWidth} theme={theme} />
           {totalTokensStr !== "" ? (
-            <LabeledValue label="Total tokens: " value={totalTokensStr} />
+            <LabeledValue
+              label="Total tokens: "
+              value={totalTokensStr}
+              theme={theme}
+            />
           ) : null}
           {totalCostStr !== "" ? (
-            <LabeledValue label="Total cost: " value={totalCostStr} />
+            <LabeledValue
+              label="Total cost: "
+              value={totalCostStr}
+              theme={theme}
+            />
           ) : null}
         </Col>
       ) : null}

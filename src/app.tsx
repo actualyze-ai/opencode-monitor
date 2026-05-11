@@ -23,6 +23,8 @@ import { CONFIG } from "./lib/config";
 import { debug } from "./lib/debug";
 import { extractErrorMessage } from "./lib/errors";
 import { useSessionStore, useUIStore, useConnectionStore } from "./stores";
+import { DEFAULT_THEME, getThemedBoxProps, getThemedTextProps } from "./themes";
+import type { Theme } from "./themes";
 import type { Session, SessionNode, ListItem } from "./types";
 
 // Re-export store functions for backwards compatibility with index.tsx
@@ -34,6 +36,7 @@ interface AppProps {
   notificationsEnabled?: boolean;
   initialSessionId?: string | undefined;
   wsPort?: number;
+  theme?: Theme;
   onExit?: () => void;
 }
 
@@ -41,6 +44,7 @@ export default function App({
   notificationsEnabled = true,
   initialSessionId,
   wsPort = CONFIG.ws.port,
+  theme = DEFAULT_THEME,
   onExit,
 }: AppProps): React.ReactNode {
   const renderer = useRenderer();
@@ -224,26 +228,35 @@ export default function App({
   );
 
   return (
-    <Col width={width} height={height}>
+    <Col width={width} height={height} {...getThemedBoxProps(theme)}>
       {/* Header */}
       <Row
         border={true}
         borderStyle="single"
-        borderColor="blue"
+        borderColor={theme.primary}
         paddingLeft={1}
         paddingRight={1}
         flexShrink={0}
+        {...getThemedBoxProps(theme)}
       >
-        <text style={{ attributes: TextAttributes.BOLD }}>
+        <text
+          style={{ attributes: TextAttributes.BOLD }}
+          {...getThemedTextProps(theme)}
+        >
           OpenCode Session Monitor
         </text>
-        <text style={{ attributes: TextAttributes.DIM }}>
+        <text style={{ attributes: TextAttributes.DIM }} fg={theme.textMuted}>
           {` | Servers: ${servers.size} | Sessions: ${flatItems.filter((i) => i.type === "session").length}/${sessions.size}`}
         </text>
       </Row>
 
       {/* Main content */}
-      <Row flexGrow={1} flexShrink={1} overflow="hidden">
+      <Row
+        flexGrow={1}
+        flexShrink={1}
+        overflow="hidden"
+        {...getThemedBoxProps(theme)}
+      >
         {/* Session list */}
         <SessionList
           visibleItems={visibleItems}
@@ -254,6 +267,7 @@ export default function App({
           servers={servers}
           nodesByServer={nodesByServer}
           collapsedServers={collapsedServers}
+          theme={theme}
         />
 
         {/* Details panel */}
@@ -261,12 +275,16 @@ export default function App({
           width={detailsPanelWidth}
           border={true}
           borderStyle="single"
-          borderColor="#666666"
+          borderColor={theme.border}
           paddingLeft={1}
           paddingRight={1}
           flexShrink={0}
+          {...getThemedBoxProps(theme)}
         >
-          <text style={{ attributes: TextAttributes.BOLD }}>
+          <text
+            style={{ attributes: TextAttributes.BOLD }}
+            {...getThemedTextProps(theme)}
+          >
             {flatItems[selectedIndex]?.type === "group"
               ? "Server Details"
               : "Session Details"}
@@ -291,6 +309,7 @@ export default function App({
                     server={server}
                     panelWidth={detailsPanelWidth}
                     nodesByServer={nodesByServer}
+                    theme={theme}
                   />
                 );
               })()
@@ -313,6 +332,7 @@ export default function App({
                       server={server}
                       serverSessions={serverSessions}
                       panelWidth={detailsPanelWidth}
+                      theme={theme}
                     />
                   );
                 })()
@@ -324,24 +344,30 @@ export default function App({
       <Row
         border={true}
         borderStyle="single"
-        borderColor="#666666"
+        borderColor={theme.border}
         paddingLeft={1}
         paddingRight={1}
         flexShrink={0}
         justifyContent="space-between"
+        {...getThemedBoxProps(theme)}
       >
-        <text style={{ attributes: TextAttributes.DIM }}>
+        <text style={{ attributes: TextAttributes.DIM }} fg={theme.textMuted}>
           {
             "q:quit | t:tui | b:browser | space:toggle | c:toggle all | g/G:top/end"
           }
         </text>
-        <text style={{ attributes: TextAttributes.DIM }}>
+        <text style={{ attributes: TextAttributes.DIM }} fg={theme.textMuted}>
           {getVersionString()}
         </text>
       </Row>
 
       {/* Browser warning modals */}
-      <BrowserModal modal={browserModal} width={width} height={height} />
+      <BrowserModal
+        modal={browserModal}
+        width={width}
+        height={height}
+        theme={theme}
+      />
     </Col>
   );
 }
