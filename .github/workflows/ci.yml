@@ -32,8 +32,18 @@ jobs:
       - name: Test with coverage
         run: bun run test:coverage
 
+  nix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v31
+
+      - name: Check flake
+        run: nix flake check
+
   release:
-    needs: [ci]
+    needs: [ci, nix]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
