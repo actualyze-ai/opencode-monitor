@@ -107,6 +107,54 @@ bun run install-plugin
 bun start
 ```
 
+### Install with Nix
+
+Run directly from the flake:
+
+```bash
+nix run github:actualyze-ai/opencode-monitor
+```
+
+Or install it into your user profile:
+
+```bash
+nix profile install github:actualyze-ai/opencode-monitor
+oc-mon --install-plugin
+oc-mon
+```
+
+To include it in a NixOS configuration that receives flake inputs, add the
+repository as an input and reference its default package:
+
+```nix
+# flake.nix
+inputs.opencode-monitor.url = "github:actualyze-ai/opencode-monitor";
+
+# configuration.nix
+environment.systemPackages = [
+  inputs.opencode-monitor.packages.${pkgs.system}.default
+];
+```
+
+### Develop with Nix
+
+The development shell provides Bun, `bun2nix`, and the packaged `oc-mon`
+command:
+
+```bash
+nix develop
+oc-mon
+bun install --frozen-lockfile
+bun run dev
+```
+
+When `bun.lock` changes, regenerate the Nix dependency expression and commit
+both files:
+
+```bash
+bun2nix -o bun.nix
+```
+
 ## OpenCode Server Mode
 
 **⚠️ Critical**: OpenCode now defaults to running **without** an HTTP server. The `t` (attach) and `b` (browser) actions require OpenCode's HTTP server to be enabled.

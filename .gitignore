@@ -22,6 +22,9 @@ build/
 *.swp
 *.swo
 
+# direnv
+.direnv/
+
 # OS
 .DS_Store
 Thumbs.db
